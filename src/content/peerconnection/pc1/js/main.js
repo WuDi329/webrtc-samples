@@ -60,6 +60,7 @@ async function start() {
   console.log('Requesting local stream');
   startButton.disabled = true;
   try {
+    //获得当前的媒体
     const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
     console.log('Received local stream');
     localVideo.srcObject = stream;
@@ -75,22 +76,32 @@ async function call() {
   hangupButton.disabled = false;
   console.log('Starting call');
   startTime = window.performance.now();
+
+  // 获取当前stream的videoTrack&audioTrack
   const videoTracks = localStream.getVideoTracks();
   const audioTracks = localStream.getAudioTracks();
+
   if (videoTracks.length > 0) {
     console.log(`Using video device: ${videoTracks[0].label}`);
   }
   if (audioTracks.length > 0) {
     console.log(`Using audio device: ${audioTracks[0].label}`);
   }
+
+  // 创建configuration
   const configuration = {};
   console.log('RTCPeerConnection configuration:', configuration);
+
+  // 根据configuration 创建RTCPeerConnection
   pc1 = new RTCPeerConnection(configuration);
   console.log('Created local peer connection object pc1');
+  //getOther调用addIceCandidate
   pc1.addEventListener('icecandidate', e => onIceCandidate(pc1, e));
   pc2 = new RTCPeerConnection(configuration);
   console.log('Created remote peer connection object pc2');
   pc2.addEventListener('icecandidate', e => onIceCandidate(pc2, e));
+
+
   pc1.addEventListener('iceconnectionstatechange', e => onIceStateChange(pc1, e));
   pc2.addEventListener('iceconnectionstatechange', e => onIceStateChange(pc2, e));
   pc2.addEventListener('track', gotRemoteStream);
